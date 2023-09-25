@@ -745,6 +745,20 @@ const getLastPendingPayment = async (req, res) => {
     });
 }
 
+const resetFinancing = async (req, res) => {
+    const { id } = req.body;
+    const response = await connection.query(`DELETE from cobranzas where idFinanciamiento = (SELECT idFinanciamiento FROM contratos where id = ${id});
+    UPDATE financiamientos SET montoFinanciado = 0, importeTotal = 0, bonificacion = 0, enganche = 0, numeroPagos = 0, periodo = 0, importeCuota = 0, importePendiente = 0, atraso = 0, adelanto = 0, precioBase = 0
+        WHERE idContrato = ${id};
+    UPDATE contratos SET idPaquete = 0 WHERE id = ${id};`, async function (err, rows) {
+        if (err) {
+            res.status(409).send(err);
+        } else {
+            res.status(200).send({ message: 'Datos actualizados correctamente', success: true });
+        }
+    });
+}
+
 
 
 module.exports = {
@@ -787,7 +801,8 @@ module.exports = {
     updateSalesWithWay,
     updateCashPayment,
     createPayment,
-    getLastPendingPayment
+    getLastPendingPayment,
+    resetFinancing
 }
 
 
