@@ -144,7 +144,7 @@ const updateService = async (req, res) => {
 //schema: id 	idContrato 	idCliente 	medioPago 	precioBase 	bonificacion 	enganche 	montoFinanciado 	numeroPagos 	interesMora 	periodo 	importeCuota 	importeTotal 	importePendiente 	importeAbonado 	fechaPrimerCuota 	fechaUltimaCuota 	
 
 const getFinancings = async (req, res) => {
-    const response = await connection.query(`SELECT f.id, f.idContrato, c.nombre as cliente, f.importeTotal, f.numeroPagos, f.importeCuota, f.importePendiente FROM financiamientos f
+    const response = await connection.query(`SELECT f.id, f.idContrato, c.nombre as cliente, f.importeTotal, f.numeroPagos, f.importeCuota, f.importePendiente  FROM financiamientos f
     left join clientes c ON f.idCliente = c.id`, function (err, rows) {
         if (err) {
             res.status(409).send(err);
@@ -691,7 +691,7 @@ const createPayment = async (req, res) => {
     } else {
         nuevoAtraso = atraso;
     }
-    queryFinanciamiento = `UPDATE financiamientos SET importeAbonado = ${nuevoImporteAbonado}, importePendiente = ${nuevoImportePendiente}, atraso = ${nuevoAtraso} WHERE idContrato = ${idContrato}`;
+    queryFinanciamiento = `UPDATE financiamientos SET importeAbonado = ${nuevoImporteAbonado}, importePendiente = ${nuevoImportePendiente}, atraso = ${nuevoAtraso}, fechaUltimoPago = '${fecha}' WHERE idContrato = ${idContrato}`;
     if (importePago >= importePendiente) {
         const response = await connection.query(`UPDATE contratos SET estado = 'Liquidado' WHERE id = ${idContrato}`, async function (err, rows) {
             if (err) {

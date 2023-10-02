@@ -63,7 +63,7 @@ const { getBranchs, getBranch, updateBranch, createBranch, deleteBranch } = requ
 const { getCalls, createCall, getCallsByEmployee, getCallsByEmployeeAndType } = require('../controllers/callcenter');
 const { getWays, getCompleteWay, getWay, updateWay, createWay, deleteWay, deleteSalesWays, insertMassiveSalesWays, createSalesWays, getLastOrder, substractOrder } = require('../controllers/ways');
 const { getDepartment, getDepartments, updateDepartment, createDepartment, deleteDepartment } = require('../controllers/departments');
-const { getCuts, getCut, createCut, updateCutStatus } = require('../controllers/cuts');
+const { getCuts, getCut, createCut, updateCutStatus, createBreakdownCut, deleteBreakdownCut, updateBreakdownCut, getBreakdownCuts } = require('../controllers/cuts');
 
 //Generic
 router.post('/genericDelete', genericDelete);
@@ -231,5 +231,9 @@ router.get('/cuts', getCuts);
 router.get('/getCut/:id', getCut);
 router.post('/updateCutStatus', updateCutStatus);
 router.post('/createCut', createCut);
+router.post('/createBreakdownCut', createBreakdownCut);
+router.post('/deleteBreakdownCut', deleteBreakdownCut);
+router.post('/updateBreakdownCut', updateBreakdownCut);
+router.get('/getBreakdownCut/:id', getBreakdownCuts);
 
 module.exports = router;
