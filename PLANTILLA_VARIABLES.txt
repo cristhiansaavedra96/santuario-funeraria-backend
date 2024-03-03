@@ -1,0 +1,8 @@
+DB_DATABASE = moisesgomez_funeraria_demo
+DB_HOST = mysql-moisesgomez.alwaysdata.net
+DB_PASSWORD = 123456ABC.1
+DB_USER = 327681
+DB_PORT = 3306
+HOST = 127.0.0.1
+NODE_ENV = development
+PORT = 4000

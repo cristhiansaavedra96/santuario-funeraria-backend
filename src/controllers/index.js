@@ -114,11 +114,15 @@ const getPermissionsByProfile = async (req, res) => {
 
 const updatePermissions = async (req, res) => {
     const { profile, permissions } = req.body;
+
+    //new transaction
+
     let query = `DELETE FROM permisos WHERE idPerfil = '${profile}';`;
     let isOk = true;
     await connection.query(query, function (err, rows) {
         if (err) {
             isOk = false;
+            console.log(err)
             res.status(409).send(err);
         }
     });
@@ -128,17 +132,23 @@ const updatePermissions = async (req, res) => {
         query += `('${permission.permiso}', '${profile}', '${permission.tipo}'),`;
     });
     query = query.slice(0, -1);
-    await connection.query(query, function (err, rows) {
-        if (err) {
-            res.status(409).send(err);
-        } else {
-            if (rows?.affectedRows > 0) {
-                res.status(200).send({ message: 'Perfil actualizado correctamente', success: true });
+    //wait 1 second
+
+    setTimeout(async () => {
+        await connection.query(query, function (err, rows) {
+            if (err) {
+                res.status(409).send(err);
             } else {
-                res.status(200).send({ message: 'Ocurrió un error', success: false });
+                if (rows?.affectedRows > 0) {
+                    console.log(rows.affectedRows)
+                    res.status(200).send({ message: 'Perfil actualizado correctamente', success: true });
+                } else {
+                    console.log(err)
+                    res.status(200).send({ message: 'Ocurrió un error', success: false });
+                }
             }
-        }
-    });
+        });
+    }, 1500);
 }
 
 const deleteContract = async (req, res) => {
@@ -184,6 +194,7 @@ const uploadLogo = async (req, res) => {
 const getLogo = async (req, res) => {
     let basePath = __basedir;
     const filepath = path.join(basePath, 'uploads', 'logo.png');
+    console.log(filepath)
     res.sendFile(filepath);
 };
 

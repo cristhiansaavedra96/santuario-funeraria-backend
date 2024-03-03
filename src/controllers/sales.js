@@ -404,8 +404,8 @@ const getContracts = async (req, res) => {
 }
 
 const createContract = async (req, res) => {
-    const { idCliente, idFinanciamiento, idSolicitud, idPaquete, fecha, tipo, asesor, estado, impMunicipal, traslado, exhumacion, otros, observaciones, referencia, complementarioBasico, paqueteEspecial } = req.body;
-    const response = await connection.query(`INSERT INTO contratos (idCliente, idFinanciamiento, idSolicitud, idPaquete, fecha, tipo, asesor, estado, impMunicipal, traslado, exhumacion, otros, observaciones, referencia, complementarioBasico, paqueteEspecial) VALUES ('${idCliente}', '${idFinanciamiento}', '${idSolicitud}', '${idPaquete}', '${fecha}', '${tipo}', '${asesor}', '${estado}', '${impMunicipal}', '${traslado}', '${exhumacion}', '${otros}', '${observaciones}', '${referencia}', '${complementarioBasico}', '${paqueteEspecial}')`, async function (err, rows) {
+    const { idCliente, idFinanciamiento, idSolicitud, idPaquete, fecha, tipo, asesor, estado, impMunicipal, traslado, exhumacion, otros, observaciones, referencia, complementarioBasico, paqueteEspecial, contratoRelacionado } = req.body;
+    const response = await connection.query(`INSERT INTO contratos (idCliente, idFinanciamiento, idSolicitud, idPaquete, fecha, tipo, asesor, estado, impMunicipal, traslado, exhumacion, otros, observaciones, referencia, complementarioBasico, paqueteEspecial, contratoRelacionado) VALUES ('${idCliente}', '${idFinanciamiento}', '${idSolicitud}', '${idPaquete}', '${fecha}', '${tipo}', '${asesor}', '${estado}', '${impMunicipal}', '${traslado}', '${exhumacion}', '${otros}', '${observaciones}', '${referencia}', '${complementarioBasico}', '${paqueteEspecial}', '${contratoRelacionado}')`, async function (err, rows) {
         if (err) {
             res.status(409).send(err);
         } else {
@@ -419,8 +419,8 @@ const createContract = async (req, res) => {
 }
 
 const updateContract = async (req, res) => {
-    const { id, idCliente, idFinanciamiento, idSolicitud, idPaquete, fecha, tipo, asesor, estado, impMunicipal, traslado, exhumacion, otros, observaciones, referencia, complementarioBasico, paqueteEspecial } = req.body;
-    const response = await connection.query(`UPDATE contratos SET idCliente = '${idCliente}', idFinanciamiento = '${idFinanciamiento}', idSolicitud = '${idSolicitud}', idPaquete = '${idPaquete}', fecha = '${fecha}', tipo = '${tipo}', asesor = '${asesor}', estado = '${estado}', impMunicipal = '${impMunicipal}', traslado = '${traslado}', exhumacion = '${exhumacion}', otros = '${otros}', observaciones = '${observaciones}', referencia = '${referencia}', complementarioBasico = '${complementarioBasico}', paqueteEspecial = '${paqueteEspecial}' WHERE id = ${id}`, function (err, rows) {
+    const { id, idCliente, idFinanciamiento, idSolicitud, idPaquete, fecha, tipo, asesor, estado, impMunicipal, traslado, exhumacion, otros, observaciones, referencia, complementarioBasico, paqueteEspecial, contratoRelacionado } = req.body;
+    const response = await connection.query(`UPDATE contratos SET idCliente = '${idCliente}', idFinanciamiento = '${idFinanciamiento}', idSolicitud = '${idSolicitud}', idPaquete = '${idPaquete}', fecha = '${fecha}', tipo = '${tipo}', asesor = '${asesor}', estado = '${estado}', impMunicipal = '${impMunicipal}', traslado = '${traslado}', exhumacion = '${exhumacion}', otros = '${otros}', observaciones = '${observaciones}', referencia = '${referencia}', complementarioBasico = '${complementarioBasico}', paqueteEspecial = '${paqueteEspecial}', contratoRelacionado = '${contratoRelacionado}' WHERE id = ${id}`, function (err, rows) {
         if (err) {
             res.status(409).send(err);
         } else {
@@ -438,10 +438,11 @@ const updateContract = async (req, res) => {
 
 const getSales = async (req, res) => {
     const response = await connection.query(`
-        SELECT v.id, c.nombre as cliente, v.idCliente, v.idContrato, v.estado, e.nombre as asesor, e2.nombre as cobrador, v.metodoPago, v.fechaLiquidacion, v.recorrido FROM ventas v
+        SELECT v.id, c.nombre as cliente, v.idCliente, v.idContrato, v.estado, e.nombre as asesor, e2.nombre as cobrador, v.metodoPago, v.fechaLiquidacion, v.recorrido, co.estado as estadoContrato FROM ventas v
         LEFT JOIN clientes c ON v.idCliente = c.id 
         LEFT JOIN empleados e ON v.asesor = e.id
-        LEFT JOIN empleados e2 ON v.cobrador = e2.id`
+        LEFT JOIN empleados e2 ON v.cobrador = e2.id
+        LEFT JOIN contratos co ON v.idContrato = co.id`
         , function (err, rows) {
             if (err) {
                 res.status(409).send(err);
@@ -693,7 +694,7 @@ const createPayment = async (req, res) => {
     }
     queryFinanciamiento = `UPDATE financiamientos SET importeAbonado = ${nuevoImporteAbonado}, importePendiente = ${nuevoImportePendiente}, atraso = ${nuevoAtraso}, fechaUltimoPago = '${fecha}' WHERE idContrato = ${idContrato}`;
     if (importePago >= importePendiente) {
-        const response = await connection.query(`UPDATE contratos SET estado = 'Liquidado' WHERE id = ${idContrato}`, async function (err, rows) {
+        const response = await connection.query(`UPDATE contratos SET estado = 'Pagado' WHERE id = ${idContrato}`, async function (err, rows) {
             if (err) {
                 res.status(409).send(err);
             } else {
@@ -732,7 +733,9 @@ const createPayment = async (req, res) => {
 
 const getLastPendingPayment = async (req, res) => {
     const { id } = req.params;
-    const response = await connection.query(`SELECT * FROM cobranzas WHERE idFinanciamiento = ${id} AND estado = 'Pendiente' ORDER BY nroCuota ASC LIMIT 1`, async function (err, rows) {
+    const response = await connection.query(`SELECT * FROM cobranzas WHERE idFinanciamiento = ${id} AND estado = 'Pendiente'
+     AND id NOT IN(SELECT idCuota FROM pagos_pendientes WHERE estado = 'PENDIENTE' OR estado = 'Pendiente')
+     ORDER BY nroCuota ASC LIMIT 1`, async function (err, rows) {
         if (err) {
             res.status(409).send(err);
         } else {
@@ -748,7 +751,7 @@ const getLastPendingPayment = async (req, res) => {
 const resetFinancing = async (req, res) => {
     const { id } = req.body;
     const response = await connection.query(`DELETE from cobranzas where idFinanciamiento = (SELECT idFinanciamiento FROM contratos where id = ${id});
-    UPDATE financiamientos SET montoFinanciado = 0, importeTotal = 0, bonificacion = 0, enganche = 0, numeroPagos = 0, periodo = 0, importeCuota = 0, importePendiente = 0, atraso = 0, adelanto = 0, precioBase = 0
+    UPDATE financiamientos SET montoFinanciado = 0, importeAbonado = 0, importeTotal = 0, bonificacion = 0, enganche = 0, numeroPagos = 0, periodo = 0, importeCuota = 0, importePendiente = 0, atraso = 0, adelanto = 0, precioBase = 0
         WHERE idContrato = ${id};
     UPDATE contratos SET idPaquete = 0 WHERE id = ${id};`, async function (err, rows) {
         if (err) {

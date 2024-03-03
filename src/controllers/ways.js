@@ -167,6 +167,33 @@ const getCompleteWay = async (req, res) => {
     });
 }
 
+const getEmployeesWays = async (req, res) => {
+    const query = `SELECT * from recorridos_empleados`;
+
+    const response = await connection.query(query, function (err, rows) {
+        if (err) {
+            res.status(409).send(err);
+        } else {
+            res.status(200).send({ employeesWays: rows, success: true });
+        }
+    });
+}
+
+const getEmployeeWays = async (req, res) => {
+    const id = req.params.id;
+    const query = `
+        SELECT re.*, r.nombre from recorridos_empleados re, recorridos r 
+        WHERE re.idEmpleado = ${id}
+        AND re.idRecorrido = r.id`;
+    const response = await connection.query(query, function (err, rows) {
+        if (err) {
+            res.status(409).send(err);
+        } else {
+            res.status(200).send({ employeeWays: rows, success: true });
+        }
+    });
+}
+
 module.exports = {
     getWays,
     getWay,
@@ -179,4 +206,6 @@ module.exports = {
     getLastOrder,
     substractOrder,
     getCompleteWay,
+    getEmployeesWays,
+    getEmployeeWays
 }

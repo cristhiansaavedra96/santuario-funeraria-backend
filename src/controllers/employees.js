@@ -79,12 +79,20 @@ const deleteEmployee = async (req, res) => {
 
 const updateEmployeesWay = async (req, res) => {
     const { ids, way } = req.body;
-    const response = await connection.query(`UPDATE empleados SET recorrido = '${way}' WHERE id IN (${ids.join(',')})`, async function (err, rows) {
+    //table: recorridos_empleados
+    //insert into recorridos_empleados (idEmpleado, idRecorrido) values (1, 1), (2, 1), (3, 1), (4, 1), (5, 1);
+    let query = 'insert into recorridos_empleados (idEmpleado, idRecorrido) values ';
+    let values = '';
+    ids.forEach((id, index) => {
+        values += `(${id}, ${way})${index === ids.length - 1 ? ';' : ', '}`;
+    });
+    query += values;
+    const response = await connection.query(query, function (err, rows) {
         if (err) {
             res.status(409).send(err);
         } else {
             if (rows?.affectedRows > 0) {
-                res.status(200).send({ message: 'Datos actualizados correctamente', success: true });
+                res.status(200).send({ message: 'Valores actualizados correctamente', success: true });
             } else {
                 res.status(200).send({ message: 'Ocurrió un error', success: false });
             }
@@ -92,11 +100,30 @@ const updateEmployeesWay = async (req, res) => {
     });
 }
 
+const deleteEmployeeWay = async (req, res) => {
+    const { id, way } = req.body;
+    //table: recorridos_empleados
+    const query = 'delete from recorridos_empleados where idEmpleado = ' + id + ' and idRecorrido = ' + way;
+    const response = await connection.query(query, function (err, rows) {
+        if (err) {
+            res.status(409).send(err);
+        } else {
+            if (rows?.affectedRows > 0) {
+                res.status(200).send({ message: 'Valores actualizados correctamente', success: true });
+            } else {
+                res.status(200).send({ message: 'Ocurrió un error', success: false });
+            }
+        }
+    });
+}
+
+
 module.exports = {
     getEmployees,
     getEmployee,
     updateEmployee,
     createEmployee,
     deleteEmployee,
-    updateEmployeesWay
+    updateEmployeesWay,
+    deleteEmployeeWay
 }

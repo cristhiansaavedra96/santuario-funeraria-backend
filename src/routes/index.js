@@ -12,7 +12,7 @@ const upload = multer({
 const router = Router();
 const { getLogo, genericGet, genericDelete, genericUpdate, createProfile, getCompanyData, updateCompanyData, createCompanyData, uploadLogo, deleteContract, getProfiles, updatePermissions, getUserPermissions, getPermissionsByProfile, deleteRequest, login, register, getRequests, insertRequest } = require('../controllers');
 const { getClients, getClient, updateClient, createClient, deleteClient, getClientByNameAndBirthDate } = require('../controllers/clients');
-const { getEmployees, getEmployee, updateEmployee, createEmployee, deleteEmployee, updateEmployeesWay } = require('../controllers/employees');
+const { getEmployees, getEmployee, updateEmployee, createEmployee, deleteEmployee, updateEmployeesWay, deleteEmployeeWay } = require('../controllers/employees');
 const { getUsers, getUser, updateUser, createUser, deleteUser } = require('../controllers/users');
 const { getPacks, getPack, updatePack, createPack, deletePack } = require('../controllers/packs');
 const { updateContractNumber,
@@ -61,9 +61,12 @@ const { updateContractNumber,
 const { importData, getLastId } = require('../controllers/imports');
 const { getBranchs, getBranch, updateBranch, createBranch, deleteBranch } = require('../controllers/branchs');
 const { getCalls, createCall, getCallsByEmployee, getCallsByEmployeeAndType } = require('../controllers/callcenter');
-const { getWays, getCompleteWay, getWay, updateWay, createWay, deleteWay, deleteSalesWays, insertMassiveSalesWays, createSalesWays, getLastOrder, substractOrder } = require('../controllers/ways');
+const { getWays, getCompleteWay, getWay, updateWay, createWay, deleteWay, deleteSalesWays, insertMassiveSalesWays, createSalesWays, getLastOrder, substractOrder, getEmployeesWays, getEmployeeWays } = require('../controllers/ways');
 const { getDepartment, getDepartments, updateDepartment, createDepartment, deleteDepartment } = require('../controllers/departments');
-const { getCuts, getCut, createCut, updateCutStatus, createBreakdownCut, deleteBreakdownCut, updateBreakdownCut, getBreakdownCuts } = require('../controllers/cuts');
+const { getCuts, getCut, createCut, updateCutStatus, createBreakdownCut, deleteBreakdownCut, updateBreakdownCut, getBreakdownCuts, createPendingPayment,
+    updatePendingPaymentStatus, cleanPendingPayments, getPendingPayments, deletePendingPayment, getPendingPaymentDetail, updateBreakdownCutPayments } = require('../controllers/cuts');
+
+const { getObituaries, getObituary, updateObituary, createObituary, deleteObituary } = require('../controllers/obituaries');
 
 //Generic
 router.post('/genericDelete', genericDelete);
@@ -117,6 +120,7 @@ router.post('/updateEmployee', updateEmployee);
 router.post('/createEmployee', createEmployee);
 router.post('/deleteEmployee', deleteEmployee);
 router.post('/updateEmployeesWay', updateEmployeesWay);
+router.post('/deleteEmployeeWay', deleteEmployeeWay);
 
 //Packs
 router.get('/packs', getPacks);
@@ -218,6 +222,8 @@ router.post('/deleteSalesWays', deleteSalesWays);
 router.get('/getLastOrder/:id', getLastOrder);
 router.post('/substractOrder', substractOrder);
 router.get('/getCompleteWay/:id', getCompleteWay);
+router.get('/getEmployeesWays', getEmployeesWays);
+router.get('/getEmployeeWays/:id', getEmployeeWays);
 
 //Departments
 router.get('/departments', getDepartments);
@@ -235,5 +241,19 @@ router.post('/createBreakdownCut', createBreakdownCut);
 router.post('/deleteBreakdownCut', deleteBreakdownCut);
 router.post('/updateBreakdownCut', updateBreakdownCut);
 router.get('/getBreakdownCut/:id', getBreakdownCuts);
+router.post('/createPendingPayment', createPendingPayment);
+router.post('/updatePendingPaymentStatus', updatePendingPaymentStatus);
+router.post('/cleanPendingPayments', cleanPendingPayments);
+router.get('/getPendingPayments', getPendingPayments);
+router.post('/deletePendingPayment', deletePendingPayment);
+router.post('/getPendingPaymentDetail', getPendingPaymentDetail)
+router.post('/updateBreakdownCutPayments', updateBreakdownCutPayments)
+
+//Obituaries
+router.get('/obituaries', getObituaries);
+router.get('/getObituary/:id', getObituary);
+router.post('/updateObituary', updateObituary);
+router.post('/createObituary', createObituary);
+router.post('/deleteObituary', deleteObituary);
 
 module.exports = router;
